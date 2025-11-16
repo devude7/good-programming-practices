@@ -1,6 +1,6 @@
 import pytest
 
-from lab1 import (
+from src.lab1 import (
     is_palindrome, fibonacci, count_vowels, calculate_discount,
     flatten_list, word_frequencies, is_prime
 )

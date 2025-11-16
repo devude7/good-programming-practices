@@ -3,8 +3,6 @@ name = "good-programming-practices"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-[tool.pytest.ini_options]
-pythonpath = ["src"]
 requires-python = ">=3.13"
 dependencies = [
     "pytest>=9.0.1",
