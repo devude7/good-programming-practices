@@ -1,9 +1,9 @@
 from typing import List
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from .models import Movie, Link, Rating, Tag
-from .database import SessionLocal
-from .schemas import (
+from src.models import Movie, Link, Rating, Tag
+from src.database import SessionLocal
+from src.schemas import (
     MovieCreate, MovieRead, MovieUpdate,
     LinkCreate, LinkRead, LinkUpdate,
     RatingCreate, RatingRead, RatingUpdate,
@@ -17,6 +17,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
 
 app = FastAPI()
 
@@ -33,7 +34,7 @@ def get_movies(db: Session = Depends(get_db)):
 
 @app.post("/movies", response_model=MovieRead, status_code=status.HTTP_201_CREATED)
 def create_movie(movie: MovieCreate, db: Session = Depends(get_db)):
-    db_movie = Movie(**movie.dict())
+    db_movie = Movie(**movie.model_dump())
     db.add(db_movie)
     db.commit()
     db.refresh(db_movie)
@@ -77,7 +78,7 @@ def get_links(db: Session = Depends(get_db)):
 
 @app.post("/links", response_model=LinkRead, status_code=status.HTTP_201_CREATED)
 def create_link(link: LinkCreate, db: Session = Depends(get_db)):
-    db_link = Link(**link.dict())
+    db_link = Link(**link.model_dump())
     db.add(db_link)
     db.commit()
     db.refresh(db_link)
@@ -121,7 +122,7 @@ def get_ratings(db: Session = Depends(get_db)):
 
 @app.post("/ratings", response_model=RatingRead, status_code=status.HTTP_201_CREATED)
 def create_rating(rating: RatingCreate, db: Session = Depends(get_db)):
-    db_rating = Rating(**rating.dict())
+    db_rating = Rating(**rating.model_dump())
     db.add(db_rating)
     db.commit()
     db.refresh(db_rating)
@@ -165,7 +166,7 @@ def get_tags(db: Session = Depends(get_db)):
 
 @app.post("/tags", response_model=TagRead, status_code=status.HTTP_201_CREATED)
 def create_tag(tag: TagCreate, db: Session = Depends(get_db)):
-    db_tag = Tag(**tag.dict())
+    db_tag = Tag(**tag.model_dump())
     db.add(db_tag)
     db.commit()
     db.refresh(db_tag)

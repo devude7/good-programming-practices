@@ -1,5 +1,4 @@
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, ConfigDict
 
 
 class MovieBase(BaseModel):
@@ -17,8 +16,7 @@ class MovieUpdate(MovieBase):
 
 class MovieRead(MovieBase):
     movieId: int
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LinkBase(BaseModel):
@@ -36,8 +34,7 @@ class LinkUpdate(LinkBase):
 
 class LinkRead(LinkBase):
     movieId: int
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RatingBase(BaseModel):
@@ -58,8 +55,7 @@ class RatingUpdate(BaseModel):
 
 class RatingRead(RatingBase):
     id: int
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TagBase(BaseModel):
@@ -80,5 +76,4 @@ class TagUpdate(BaseModel):
 
 class TagRead(TagBase):
     id: int
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
