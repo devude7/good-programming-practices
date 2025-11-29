@@ -1,75 +1,38 @@
-import csv
 from fastapi import FastAPI
-from pydantic import BaseModel
-from typing import List
+from sqlalchemy.orm import Session
+from .models import Movie, Link, Rating, Tag
+from .database import engine, SessionLocal
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 app = FastAPI()
+get_db()
 
-class Movie(BaseModel):
-    movieId: str
-    title: str
-    genres: str
-
-class Link(BaseModel):
-    movieId: str
-    imdbId: str
-    tmdbId: str
-
-class Rating(BaseModel):
-    userId: str
-    movieId: str
-    rating: float
-    timestamp: str
-
-class Tag(BaseModel):
-    userId: str
-    movieId: str
-    tag: str
-    timestamp: str
-
-@app.get("/movies", response_model=List[dict])
+@app.get("/movies")
 def get_movies():
-    movies = []
-    with open('database/movies.csv', newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            movie = Movie(**row)
-            movies.append(movie.__dict__) 
-    return movies
+    with SessionLocal() as db:
+        return db.query(Movie).all()
 
-
-@app.get("/links", response_model=List[dict])
+@app.get("/links")
 def get_links():
-    links = []
-    with open('database/links.csv', newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            link = Link(**row)
-            links.append(link.__dict__)
-    return links
+    with SessionLocal() as db:
+        return db.query(Link).all()
 
-
-@app.get("/ratings", response_model=List[dict])
+@app.get("/ratings")
 def get_ratings():
-    ratings = []
-    with open('database/ratings.csv', newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            row['rating'] = float(row['rating'])
-            rating = Rating(**row)
-            ratings.append(rating.__dict__)
-    return ratings
+    with SessionLocal() as db:
+        return db.query(Rating).all()
 
-
-@app.get("/tags", response_model=List[dict])
+@app.get("/tags")
 def get_tags():
-    tags = []
-    with open('database/tags.csv', newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            tag = Tag(**row)
-            tags.append(tag.__dict__)
-    return tags
+    with SessionLocal() as db:
+        return db.query(Tag).all()
 
 
 @app.get("/")
