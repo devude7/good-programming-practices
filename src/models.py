@@ -1,6 +1,7 @@
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy import String, ForeignKey
 
+
 class Base(DeclarativeBase):
     pass
 
@@ -31,3 +32,11 @@ class Tag(Base):
     movieId: Mapped[int] = mapped_column(ForeignKey("movies.movieId"))
     tag: Mapped[str] = mapped_column(String)
     timestamp: Mapped[int]
+
+
+class User(Base):
+    __tablename__ = "users"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    username: Mapped[str] = mapped_column(String, unique=True, index=True)
+    password_hash: Mapped[str] = mapped_column(String)
+    roles: Mapped[str] = mapped_column(String)

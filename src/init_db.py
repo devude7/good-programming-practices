@@ -1,7 +1,8 @@
 import csv
 from sqlalchemy.orm import Session
-from database import engine
-from models import Base, Movie, Link, Rating, Tag
+from src.database import engine
+from src.models import Base, Movie, Link, Rating, Tag, User
+from src.utils.auth import hash_password
 
 Base.metadata.create_all(engine)
 
@@ -46,4 +47,18 @@ with Session(engine) as session:
                     timestamp=row["timestamp"]
                 ))
 
+        session.commit()
+
+
+    existing_admin = session.query(User).filter(User.username == "admin").first()
+
+    if existing_admin:
+        print("Admin user already exists.")
+    else:
+        admin = User(
+            username="admin",
+            password_hash=hash_password("admin"),
+            roles="ADMIN"
+        )
+        session.add(admin)
         session.commit()

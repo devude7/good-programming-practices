@@ -77,3 +77,29 @@ class TagUpdate(BaseModel):
 class TagRead(TagBase):
     id: int
     model_config = ConfigDict(from_attributes=True)
+
+
+class UserBase(BaseModel):
+    username: str
+    roles: list[str]
+
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+    roles: list[str]
+
+
+class UserRead(UserBase):
+    id: int
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
