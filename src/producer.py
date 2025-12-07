@@ -1,56 +1,52 @@
-import csv
-import os
+import sqlite3
 import uuid
 from datetime import datetime
 import argparse
-import time
+import os
 
-QUEUE_FILE = "database/queue.csv"
-LOCK_FILE = "queue.lock"
+DB_FILE = "database/queue.db"
 
-def acquire_lock(timeout=10, delay=0.1):
-    start = time.time()
-    while True:
-        try:
-            with open(LOCK_FILE, "x"):
-                return
-        except FileExistsError:
-            if time.time() - start > timeout:
-                raise TimeoutError("Nie udało się zdobyć locka na plik kolejki.")
-            time.sleep(delay)
+def init_db():
+    os.makedirs("database", exist_ok=True)
 
-def release_lock():
-    try:
-        os.remove(LOCK_FILE)
-    except FileNotFoundError:
-        pass
-
-def init_queue_file_if_needed():
-    if not os.path.exists(QUEUE_FILE):
-        with open(QUEUE_FILE, mode="w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow(["id", "status", "created_at", "started_at", "finished_at", "description"])
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS jobs (
+            id TEXT PRIMARY KEY,
+            status TEXT NOT NULL,
+            created_at TEXT,
+            started_at TEXT,
+            finished_at TEXT,
+            description TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
 
 def add_job(description: str):
-    acquire_lock()
-    try:
-        init_queue_file_if_needed()
-        job_id = str(uuid.uuid4())
-        created_at = datetime.now().isoformat(timespec="seconds")
-        row = [job_id, "pending", created_at, "", "", description]
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
 
-        with open(QUEUE_FILE, mode="a", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow(row)
-        print(f"Dodano zadanie: {job_id} - {description}")
-    finally:
-        release_lock()
+    job_id = str(uuid.uuid4())
+    created_at = datetime.now().isoformat(timespec="seconds")
+
+    c.execute("""
+        INSERT INTO jobs (id, status, created_at, description)
+        VALUES (?, 'pending', ?, ?)
+    """, (job_id, created_at, description))
+
+    conn.commit()
+    conn.close()
+    print(f"Dodano zadanie: {job_id} - {description}")
 
 def main():
     parser = argparse.ArgumentParser(description="Producer - dodaje zadania do kolejki.")
-    parser.add_argument("--count", type=int, default=1, help="Ile zadań dodać do kolejki (domyślnie 1)")
-    parser.add_argument("--desc", type=str, default="Rozmowa telefoniczna", help="Opis zadania")
+    parser.add_argument("--count", type=int, default=1)
+    parser.add_argument("--desc", type=str, default="Rozmowa telefoniczna")
     args = parser.parse_args()
+
+    init_db()
 
     for i in range(1, args.count + 1):
         desc = f"{args.desc} #{i}"
