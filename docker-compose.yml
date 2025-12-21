@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: some-rabbit
+    hostname: my-rabbit
+    ports:
+      - "8080:15672"  # Management UI
+      - "5672:5672"   # AMQP port for Python client
