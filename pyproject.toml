@@ -23,4 +23,5 @@ dependencies = [
     "scipy",
     "requests",
     "pyyaml",
+    "aio_pika",
 ]
