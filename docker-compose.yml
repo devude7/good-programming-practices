@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  service-a:
+    build: ./src/service_a
+    ports:
+      - "8000:8000"
+    depends_on:
+      - rabbitmq
+
+  service-b-api:
+    build: ./src/service_b
+    command: uvicorn api:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8001:8000"
+    depends_on:
+      - rabbitmq
+
+  service-b-consumer:
+    build: ./src/service_b
+    command: python consumer.py
+    depends_on:
+      - rabbitmq
+    deploy:
+      replicas: 3
